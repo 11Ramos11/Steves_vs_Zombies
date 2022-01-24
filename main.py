@@ -415,7 +415,7 @@ while running:
                     block = mixer.Sound("block.wav")
                     block.play()
 
-            shieldcard_requirements = sqr_size_x*2 < mouse_x < sqr_size_x*3 + shieldcard_x and 0 < mouse_y < sqr_size_y
+            shieldcard_requirements = sqr_size_x*2 < mouse_x < sqr_size_x*3 and 0 < mouse_y < sqr_size_y
 
             if shieldcard_requirements:
                 select = mixer.Sound("select.wav")
@@ -443,7 +443,7 @@ while running:
                     placing = mixer.Sound("placing.wav")
                     placing.play()
 
-            miner_card_requirements = 0 < mouse_x < sqr_size_x + shieldcard_x and 0 < mouse_y < sqr_size_y
+            miner_card_requirements = 0 < mouse_x < sqr_size_x and 0 < mouse_y < sqr_size_y
             if miner_card_requirements:
                 select = mixer.Sound("select.wav")
                 select.play()
