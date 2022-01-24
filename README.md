@@ -21,8 +21,8 @@
 *---É um jogo de tower-defense em que o objetivo do jogo é impedir que os zombies atravessem o terreno. 
 Apanham-se barras de ouro que deixam comprar os diferentes tipos de aliados para colocar no terreno.
 O mineiro custa 50 barras, e fornece 25 barras de 13 em 13 segundos.
-Os arqueiros matam os zombies.
-O bloco serve de escudo porque tem mais hp. 
+O arqueiro custa 100 barrasmatam os zombies.
+O bloco custa custa 75 barras e serve de escudo porque tem mais hp. 
 Quanto mais tempo de sobrevivencia, maior a pontuação.
 A quantidade de zombies aumenta ao longo do tempo---*
 
