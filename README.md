@@ -38,7 +38,7 @@ A quantidade de zombies aumenta ao longo do tempo---*
 ### Tarefas
 
 1. gerar os tempos e posições dos zombies e carregá-los.
-1. ler teclas e colocar os aliados de acordo com elas.
-2. verificar se os zombies chegam ao final do terreno.
+2. ler o rato e colocar os aliados de acordo com ele.
+3. verificar se os zombies chegam ao final do terreno.
 
 - Atualizado a última vez em 23/01/2022
