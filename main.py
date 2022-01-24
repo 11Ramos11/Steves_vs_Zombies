@@ -259,7 +259,7 @@ eating_timer = 0
 
 gold_bar = pygame.image.load("gold.png")
 start_gold_timer = 0
-gold_bars = 200
+gold_bars = 0
 gold_cooldown = 5
 gold_elapsed = 0
 gold_bar_spawned = pygame.image.load("gold_spawned.png")
@@ -299,9 +299,9 @@ for i in range(1, col_n):
 
 while running:
 
-    screen.fill(pygame.Color((225, 198, 153, 255)))
     timer = pygame.time.get_ticks()
     while not gameover:
+        screen.fill(pygame.Color((225, 198, 153, 255)))
         for col in range(col_n):
             for row in range(1,row_n - 1):
                 if grid[col][row] == 1:
@@ -311,6 +311,7 @@ while running:
                     sqr2_color = pygame.Color((100, 233, 112, 255))
                     pygame.draw.rect(screen, sqr2_color, pygame.Rect(col * sqr_size_x, row * sqr_size_y, sqr_size_x, sqr_size_y))
 
+        timer = pygame.time.get_ticks()
         time = pygame.time.get_ticks() / 1000 - new_time
         dt = clock.tick()
 
@@ -326,20 +327,19 @@ while running:
             zombie_times += [new_timing]
             index += 1
 
-        pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect(0, 0, sqr_size_x * 3, sqr_size_y))
-        pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y))
-        timer = pygame.time.get_ticks()
+        pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect(0, 0, sqr_size_x * 3, sqr_size_y), 0, 10, 0, 0, 0)
+        pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y), 0, 0, 0, 0, 10)
         screen.blit(soldier_card, sol_card_pos)
         screen.blit(miner_card, minercard_pos)
         screen.blit(shield_card, shieldcard_pos)
         screen.blit(bucket_card, bucket_pos)
         pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(0, 0, sqr_size_x, sqr_size_y), 3)
-        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
-        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y), 3)
-        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x, 0, sqr_size_x, sqr_size_y),3)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y),3, 10, 0, 0, 0)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y),3, 0, 0, 0, 10)
 
         if bucket_selected:
-            pygame.draw.rect(screen, pygame.Color("red"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
+            pygame.draw.rect(screen, pygame.Color("red"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y),3, 0, 0, 0, 10)
 
         if miner_selected:
             pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(0, 0, sqr_size_x, sqr_size_y), 3)
@@ -348,7 +348,7 @@ while running:
             pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
 
         if shield_selected:
-            pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y), 3)
+            pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y),3, 10, 0, 0, 0)
 
         if click:
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -361,7 +361,8 @@ while running:
                 temp_square = (mouse_x // sqr_size_x, mouse_y // sqr_size_y)
                 for soldier in Soldiers:
                     if soldier.temp_square == temp_square:
-                        Soldiers.remove(soldier)
+                        occupied_squares.remove(shield.temp_square)
+                        soldier.dead = True
                         bucket_requirements = False
                         lava = mixer.Sound("lava.wav")
                         lava.play()
@@ -369,14 +370,16 @@ while running:
                 if bucket_requirements:
                     for miner in Miners:
                         if miner.temp_square == temp_square:
-                            Miners.remove(miner)
+                            occupied_squares.remove(shield.temp_square)
+                            miner.dead = True
                             bucket_requirements = False
                             lava = mixer.Sound("lava.wav")
                             lava.play()
                 if bucket_requirements:
                     for shield in Shields:
                         if shield.temp_square == temp_square:
-                            Shields.remove(shield)
+                            occupied_squares.remove(shield.temp_square)
+                            shield.dead = True
                             bucket_requirements = False
                             lava = mixer.Sound("lava.wav")
                             lava.play()
@@ -424,7 +427,7 @@ while running:
                     miner_selected = False
                     sol_selected = False
                     bucket_selected = False
-                    print("ola")
+
 
             miner_requirements = miner_selected and sqr_size_y <= mouse_y <= (row_n - 1) * sqr_size_y and gold_bars >= 50 and not gold_bar_requirements
 
