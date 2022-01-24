@@ -98,7 +98,6 @@ class Miner:
 
 Miners = []
 miner_notif = False
-alpha_elapsed = 0
 
 
 class Soldier:
@@ -361,18 +360,20 @@ while running:
                 temp_square = (mouse_x // sqr_size_x, mouse_y // sqr_size_y)
                 for soldier in Soldiers:
                     if soldier.temp_square == temp_square:
-                        occupied_squares.remove(shield.temp_square)
+                        occupied_squares.remove(soldier.temp_square)
                         soldier.dead = True
                         bucket_requirements = False
+                        Soldiers.remove(soldier)
                         lava = mixer.Sound("lava.wav")
                         lava.play()
                         break
                 if bucket_requirements:
                     for miner in Miners:
                         if miner.temp_square == temp_square:
-                            occupied_squares.remove(shield.temp_square)
+                            occupied_squares.remove(miner.temp_square)
                             miner.dead = True
                             bucket_requirements = False
+                            Miners.remove(miner)
                             lava = mixer.Sound("lava.wav")
                             lava.play()
                 if bucket_requirements:
@@ -381,6 +382,7 @@ while running:
                             occupied_squares.remove(shield.temp_square)
                             shield.dead = True
                             bucket_requirements = False
+                            Shields.remove(shield)
                             lava = mixer.Sound("lava.wav")
                             lava.play()
                 bucket_requirements = False
@@ -633,24 +635,14 @@ while running:
                 shield_selected = False
                 miner_selected = False
                 sol_selected = False
-                new_time = pygame.time.get_ticks() / 1000
+                bucket_selected = False
+                new_time = timer
                 gold_bars = 0
                 gold_spawned = False
                 gold_elapsed = timer
                 start_gold_timer = timer
                 shooting_timer = timer
-                alpha = 0
-
-                if not gameover:
-                    for zomb in Level_1:
-                        zomb.speed *= 1.5
-                    for soldier in Soldiers:
-                        soldier.bullet_cooldown *= 0.5
-                        soldier.bullet_speed *= 1.5
-                    for miner in Miners:
-                        miner.gold_cooldown *= 0.5
-                    gold_cooldown *= 0.5
-
+                mixer.music.play(-1)
                 gameover = False
 
         if ev.type == pygame.QUIT:
