@@ -18,18 +18,17 @@
 
 ### Descrição
 
-*---É um jogo de tower-defense em que o objetivo do jogo é impedir que os zombies atravessem o terreno. 
+*É um jogo de tower-defense em que o objetivo do jogo é impedir que os zombies atravessem o terreno. 
 Apanham-se barras de ouro que deixam comprar os diferentes tipos de aliados para colocar no terreno.
 O mineiro custa 50 barras, e fornece 25 barras de 13 em 13 segundos.
 O arqueiro custa 100 barrasmatam os zombies.
 O bloco custa custa 75 barras e serve de escudo porque tem mais hp. 
 Quanto mais tempo de sobrevivencia, maior a pontuação.
-A quantidade de zombies aumenta ao longo do tempo---*
+A quantidade de zombies aumenta ao longo do tempo*
 
 ### UI
 
-![image](https://user-images.githubusercontent.com/92692460/150703465-15697b5c-8b63-4059-ba96-5d9a553c6f0b.png)
-
+![image](https://user-images.githubusercontent.com/92692460/150788649-ea9e3dd1-032b-4d37-9e46-1798438b7227.png)
 
 ### Pacotes
 
