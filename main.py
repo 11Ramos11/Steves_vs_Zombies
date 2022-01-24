@@ -57,7 +57,7 @@ class Miner:
     dead = False
     interval = 0
     time_set = False
-    gold_cooldown = 13
+    gold_cooldown = random.randint(11,18)
     alpha = 0
 
     def health_bar(self):
@@ -86,11 +86,12 @@ class Miner:
             screen.blit(miner_notif, (notif_x, notif_y))
             self.alpha -= 0.5
 
-        if (time - self.interval) / 1000 >= self.gold_cooldown:
+        if time - self.interval >= self.gold_cooldown:
             self.interval = time
             xp = mixer.Sound("xp.wav")
             xp.play()
             self.alpha = 200
+            self.gold_cooldown = random.randint(11,18)
             return True
         return False
 
@@ -114,7 +115,6 @@ class Soldier:
     bullet_x = 0
     temp_bool = True
     wait = False
-    bullet_x = x + size_x - 19
     bullet_y = y - 2
     one_shot = False
     bullet_speed = 0.4
@@ -134,7 +134,7 @@ class Soldier:
             if self.one_shot:
                 self.bullet_x += self.bullet_speed * dt
                 screen.blit(self.bullet_img, (self.bullet_x, self.bullet_y))
-            elif (time - self.timer)/1000 >= self.bullet_cooldown:
+            elif time - self.timer >= self.bullet_cooldown:
                 self.timer = time
                 self.one_shot = True
                 bow = mixer.Sound("bow.wav")
@@ -171,7 +171,7 @@ class Zombie:
     fst_time_hp = True
 
     def ate(self, time):
-        if (time - self.timer) / 1000 >= 0.5:
+        if time - self.timer >= 0.5:
             self.timer = time
             return True
         else:
@@ -228,6 +228,12 @@ def add_zombies(limits, x):
     return [timing, (a,b)]
 
 
+bucket_card = pygame.image.load("bucket.png")
+bucket_pos = (screen_x - 76, 3)
+minercard_x = 80
+minercard_y = 80
+bucket_selected = False
+
 miner_card = pygame.image.load("miner_card.png")
 minercard_pos = (5, 4)
 minercard_x = 80
@@ -235,15 +241,15 @@ minercard_y = 63
 miner_selected = False
 
 soldier_card = pygame.image.load("soldier_sel.png")
-sol_card_pos = (minercard_pos[0] + minercard_x + 10, 6)
-sol_card_x = 80
-sol_card_y = 62
+sol_card_pos = (minercard_pos[0] + minercard_x + 18, 3)
+sol_card_x = 65
+sol_card_y = 65
 sol_selected = False
 
 shield_card = pygame.image.load("shield_card.png")
-shieldcard_pos = (sol_card_pos[0] + sol_card_x + 18, 0)
-shieldcard_x = 67
-shieldcard_y = 75
+shieldcard_pos = (sol_card_pos[0] + sol_card_x + 38, 0)
+shieldcard_x = 65
+shieldcard_y = 35
 shield_selected = False
 
 occupied_squares = []
@@ -253,7 +259,7 @@ eating_timer = 0
 
 gold_bar = pygame.image.load("gold.png")
 start_gold_timer = 0
-gold_bars = 0
+gold_bars = 200
 gold_cooldown = 5
 gold_elapsed = 0
 gold_bar_spawned = pygame.image.load("gold_spawned.png")
@@ -292,13 +298,10 @@ for i in range(1, col_n):
     grid.append(column)
 
 while running:
+
+    screen.fill(pygame.Color((225, 198, 153, 255)))
     timer = pygame.time.get_ticks()
     while not gameover:
-        timer = pygame.time.get_ticks()
-        screen.fill(pygame.Color((225, 198, 153, 255)))
-        screen.blit(soldier_card, sol_card_pos)
-        screen.blit(miner_card, minercard_pos)
-        screen.blit(shield_card, shieldcard_pos)
         for col in range(col_n):
             for row in range(1,row_n - 1):
                 if grid[col][row] == 1:
@@ -323,6 +326,21 @@ while running:
             zombie_times += [new_timing]
             index += 1
 
+        pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect(0, 0, sqr_size_x * 3, sqr_size_y))
+        pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y))
+        timer = pygame.time.get_ticks()
+        screen.blit(soldier_card, sol_card_pos)
+        screen.blit(miner_card, minercard_pos)
+        screen.blit(shield_card, shieldcard_pos)
+        screen.blit(bucket_card, bucket_pos)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(0, 0, sqr_size_x, sqr_size_y), 3)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y), 3)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
+
+        if bucket_selected:
+            pygame.draw.rect(screen, pygame.Color("red"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
+
         if miner_selected:
             pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(0, 0, sqr_size_x, sqr_size_y), 3)
 
@@ -336,6 +354,49 @@ while running:
             mouse_x, mouse_y = pygame.mouse.get_pos()
 
             gold_bar_requirements = gold_pos[0] + gold_spawn_sizex >= mouse_x >= gold_pos[0] and gold_spawned and gold_pos[1] + gold_spawn_sizey >= mouse_y >= gold_pos[1]
+
+            bucket_requirements = bucket_selected and sqr_size_y <= mouse_y <= (row_n - 1) * sqr_size_y and not gold_bar_requirements
+
+            if bucket_requirements:
+                temp_square = (mouse_x // sqr_size_x, mouse_y // sqr_size_y)
+                for soldier in Soldiers:
+                    if soldier.temp_square == temp_square:
+                        Soldiers.remove(soldier)
+                        bucket_requirements = False
+                        lava = mixer.Sound("lava.wav")
+                        lava.play()
+                        break
+                if bucket_requirements:
+                    for miner in Miners:
+                        if miner.temp_square == temp_square:
+                            Miners.remove(miner)
+                            bucket_requirements = False
+                            lava = mixer.Sound("lava.wav")
+                            lava.play()
+                if bucket_requirements:
+                    for shield in Shields:
+                        if shield.temp_square == temp_square:
+                            Shields.remove(shield)
+                            bucket_requirements = False
+                            lava = mixer.Sound("lava.wav")
+                            lava.play()
+                bucket_requirements = False
+                bucket_selected = False
+
+
+            bucketcard_requirements = screen_x - sqr_size_x < mouse_x < screen_x and 0 < mouse_y < sqr_size_y
+
+            if bucketcard_requirements:
+                select = mixer.Sound("select.wav")
+                select.play()
+                if bucket_selected:
+                    bucket_selected = False
+                else:
+                    miner_selected = False
+                    sol_selected = False
+                    shield_selected = False
+                    bucket_selected = True
+
 
             shield_requirements = shield_selected and sqr_size_y <= mouse_y <= (row_n - 1) * sqr_size_y and gold_bars >= 75 and not gold_bar_requirements
 
@@ -351,7 +412,7 @@ while running:
                     block = mixer.Sound("block.wav")
                     block.play()
 
-            shieldcard_requirements = shieldcard_pos[0] < mouse_x < shieldcard_pos[0] + shieldcard_x and shieldcard_pos[1] < mouse_y < shieldcard_pos[1] + shieldcard_y
+            shieldcard_requirements = sqr_size_x*2 < mouse_x < sqr_size_x*3 + shieldcard_x and 0 < mouse_y < sqr_size_y
 
             if shieldcard_requirements:
                 select = mixer.Sound("select.wav")
@@ -362,6 +423,8 @@ while running:
                     shield_selected = True
                     miner_selected = False
                     sol_selected = False
+                    bucket_selected = False
+                    print("ola")
 
             miner_requirements = miner_selected and sqr_size_y <= mouse_y <= (row_n - 1) * sqr_size_y and gold_bars >= 50 and not gold_bar_requirements
 
@@ -377,7 +440,7 @@ while running:
                     placing = mixer.Sound("placing.wav")
                     placing.play()
 
-            miner_card_requirements = minercard_pos[0] < mouse_x < minercard_pos[0] + minercard_x and minercard_pos[1] < mouse_y < minercard_pos[1] + minercard_y
+            miner_card_requirements = 0 < mouse_x < sqr_size_x + shieldcard_x and 0 < mouse_y < sqr_size_y
             if miner_card_requirements:
                 select = mixer.Sound("select.wav")
                 select.play()
@@ -387,6 +450,7 @@ while running:
                     shield_selected = False
                     miner_selected = True
                     sol_selected = False
+                    bucket_selected = False
 
             soldier_requirements = sol_selected and sqr_size_y <= mouse_y <= (row_n-1)*sqr_size_y and gold_bars >= 100 and not gold_bar_requirements
             if soldier_requirements:
@@ -401,7 +465,7 @@ while running:
                     placing = mixer.Sound("placing.wav")
                     placing.play()
 
-            soldier_card_requirements = sol_card_pos[0] < mouse_x < sol_card_pos[0] + sol_card_x and sol_card_pos[1] < mouse_y < sol_card_pos[1] + sol_card_y
+            soldier_card_requirements = sqr_size_x < mouse_x < sqr_size_x*2  and 0 < mouse_y < sqr_size_y
             if soldier_card_requirements:
                 select = mixer.Sound("select.wav")
                 select.play()
@@ -411,6 +475,7 @@ while running:
                     shield_selected = False
                     miner_selected = False
                     sol_selected = True
+                    bucket_selected = False
 
             if gold_bar_requirements:
                 gold_spawned = False
@@ -437,7 +502,7 @@ while running:
             if eater.y // sqr_size_y == eaten.y // sqr_size_y and (eaten.x + eaten.size_x / 2) <= eater.x + 25 <= (eaten.x + eaten.size_x):
                 eater.speed = -0.03 * eaten.dead
 
-                if eater.ate(timer):
+                if eater.ate(time):
                     eaten.hp -= 4
 
                 if eaten.hp <= 0:
@@ -474,7 +539,7 @@ while running:
                 miner.x, miner.y = miner.pos
             miner.appear()
 
-            gold_bars += 25 * int(miner.timer(timer))
+            gold_bars += 25 * int(miner.timer(time))
 
             for zomb in Level_1:
                 collision(zomb, miner)
@@ -497,15 +562,17 @@ while running:
 
             for zomb in Level_1:
                 temp_zombs = [zomba.x for zomba in Level_1 if zomba.placed and zomba.y // sqr_size_y == zomb.y // sqr_size_y and zomba.x > soldier.x]
+
                 try:
+
                     if zomb.x == min(temp_zombs):
                         if zomb.y // sqr_size_y == soldier.y // sqr_size_y:
                             if soldier.x < zomb.x:
                                 if not bullet_unset:
                                     soldier.bullet_x = soldier.x + soldier.size_x - 19
                                     bullet_unset = True
-                                if soldier.zombie_shot(zomb.x, dt, timer):
-                                    zomb.hp -= 100/6
+                                if soldier.zombie_shot(zomb.x, dt, time):
+                                    zomb.hp -= 20
                                     bullet_unset = False
 
                     collision(zomb,soldier)
@@ -518,13 +585,13 @@ while running:
             if zomb.x + zomb.size_x <= 0:
                 gameover = True
 
-        if (timer - gold_elapsed) / 1000 >= gold_spawn_cooldown and not gold_spawned:
-            gold_elapsed = timer
+        if time - gold_elapsed >= gold_spawn_cooldown and not gold_spawned:
+            gold_elapsed = time
             gold_pos = (random.randint(0, screen_x-gold_spawn_sizex), random.randint(sqr_size_y, screen_y - sqr_size_y * 2))
             gold_spawned = True
 
         if gold_spawned:
-            gold_elapsed = timer
+            gold_elapsed = time
             screen.blit(gold_bar_spawned, gold_pos)
 
         myFontGold = pygame.font.Font("myfont.otf", 65)
@@ -545,7 +612,7 @@ while running:
 
     if running:
         myFontScore = pygame.font.Font("myfont.otf", 30)
-        score_label = myFontScore.render("Your Score: " + str(time), 1, pygame.Color("Red"))
+        score_label = myFontScore.render("Your Score: " + str(int(time)), 1, pygame.Color("Red"))
         score_x, score_y = (score_label.get_size())
         screen.blit(gameoverscreen, (0, 0))
         screen.blit(score_label, ((screen_x/2 - (score_x/2)), screen_y - score_y - 5))
