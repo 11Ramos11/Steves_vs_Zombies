@@ -29,7 +29,7 @@ A quantidade de zombies aumenta ao longo do tempo*
 
 ### UI
 
-![image](https://user-images.githubusercontent.com/92692460/150788649-ea9e3dd1-032b-4d37-9e46-1798438b7227.png)
+![image](https://user-images.githubusercontent.com/92692460/151075249-06c42db0-0831-4252-949c-b5a8fce86204.png)
 
 ### Pacotes
 
