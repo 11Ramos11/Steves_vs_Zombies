@@ -87,7 +87,7 @@ class Miner:
             screen.blit(miner_notif, (notif_x, notif_y))
         else:
             screen.blit(miner_notif, (notif_x, notif_y))
-            self.alpha -= 0.5
+            self.alpha -= 2.5
 
         if time - self.interval >= self.gold_cooldown:
             self.interval = time
@@ -257,7 +257,7 @@ shield_selected = False
 occupied_squares = []
 
 gold_bar = pygame.image.load("gold.png")
-gold_bars = 0
+gold_bars = 2000
 gold_cooldown = 5
 gold_elapsed = 0
 gold_bar_spawned = pygame.image.load("gold_spawned.png")
@@ -359,29 +359,23 @@ while running:
                 temp_square = (mouse_x // sqr_size_x, mouse_y // sqr_size_y)
                 for soldier in Soldiers:
                     if soldier.temp_square == temp_square:
-                        occupied_squares.remove(soldier.temp_square)
                         soldier.dead = True
                         bucket_requirements = False
-                        Soldiers.remove(soldier)
                         lava = mixer.Sound("lava.wav")
                         lava.play()
                         break
                 if bucket_requirements:
                     for miner in Miners:
                         if miner.temp_square == temp_square:
-                            occupied_squares.remove(miner.temp_square)
                             miner.dead = True
                             bucket_requirements = False
-                            Miners.remove(miner)
                             lava = mixer.Sound("lava.wav")
                             lava.play()
                 if bucket_requirements:
                     for shield in Shields:
                         if shield.temp_square == temp_square:
-                            occupied_squares.remove(shield.temp_square)
                             shield.dead = True
                             bucket_requirements = False
-                            Shields.remove(shield)
                             lava = mixer.Sound("lava.wav")
                             lava.play()
                 bucket_requirements = False
@@ -440,6 +434,7 @@ while running:
                     occupied_squares += [temp_square]
                     temp_placed_miner = Miner()
                     temp_placed_miner.temp_square = temp_square
+                    temp_placed_miner.gold_cooldown = random.randint(11,18)
                     Miners.append(temp_placed_miner)
                     miner_selected = False
                     gold_bars -= 50
@@ -471,7 +466,7 @@ while running:
                     placing = mixer.Sound("placing.wav")
                     placing.play()
 
-            soldier_card_requirements = sqr_size_x < mouse_x < sqr_size_x*2  and 0 < mouse_y < sqr_size_y
+            soldier_card_requirements = sqr_size_x < mouse_x < sqr_size_x*2 and 0 < mouse_y < sqr_size_y
             if soldier_card_requirements:
                 select = mixer.Sound("select.wav")
                 select.play()
@@ -513,10 +508,14 @@ while running:
 
                 if eaten.hp <= 0:
                     eaten.dead = True
+                    eater.speed = -0.03
+
 
         for shield in Shields:
+            for zomb in Level_1:
+                collision(zomb, shield)
 
-            if shield.dead and shield.temp_square in occupied_squares:
+            if shield.dead:
                 occupied_squares.remove(shield.temp_square)
                 Shields.remove(shield)
                 block = mixer.Sound("block.wav")
@@ -528,12 +527,14 @@ while running:
                 shield.x, shield.y = shield.pos
             shield.appear()
 
-            for zomb in Level_1:
-                collision(zomb, shield)
+
 
         for miner in Miners:
 
-            if miner.dead and miner.temp_square in occupied_squares:
+            for zomb in Level_1:
+                collision(zomb, miner)
+
+            if miner.dead:
                 occupied_squares.remove(miner.temp_square)
                 Miners.remove(miner)
                 oof = mixer.Sound("oof.wav")
@@ -547,13 +548,28 @@ while running:
 
             gold_bars += 25 * int(miner.timer(time))
 
-            for zomb in Level_1:
-                collision(zomb, miner)
-
 
         for soldier in Soldiers:
 
-            if soldier.dead and soldier.temp_square in occupied_squares:
+            for zomb in Level_1:
+                collision(zomb, soldier)
+
+                temp_zombs = [zomba.x for zomba in Level_1 if
+                              zomba.placed and zomba.y // sqr_size_y == zomb.y // sqr_size_y and zomba.x > soldier.x]
+                try:
+                    if zomb.x == min(temp_zombs):
+                        if zomb.y // sqr_size_y == soldier.y // sqr_size_y:
+                            if soldier.x < zomb.x:
+                                if not bullet_unset:
+                                    soldier.bullet_x = soldier.x + soldier.size_x - 19
+                                    bullet_unset = True
+                                if soldier.zombie_shot(zomb.x, dt, time):
+                                    zomb.hp -= 20
+                                    bullet_unset = False
+                except:
+                    pass
+
+            if soldier.dead:
                 occupied_squares.remove(soldier.temp_square)
                 Soldiers.remove(soldier)
                 oof = mixer.Sound("oof.wav")
@@ -565,26 +581,6 @@ while running:
                 soldier.x, soldier.y = soldier.pos
                 soldier.bullet_y = soldier.y - 2
             soldier.appear()
-
-            for zomb in Level_1:
-                temp_zombs = [zomba.x for zomba in Level_1 if zomba.placed and zomba.y // sqr_size_y == zomb.y // sqr_size_y and zomba.x > soldier.x]
-
-                try:
-
-                    if zomb.x == min(temp_zombs):
-                        if zomb.y // sqr_size_y == soldier.y // sqr_size_y:
-                            if soldier.x < zomb.x:
-                                if not bullet_unset:
-                                    soldier.bullet_x = soldier.x + soldier.size_x - 19
-                                    bullet_unset = True
-                                if soldier.zombie_shot(zomb.x, dt, time):
-                                    zomb.hp -= 20
-                                    bullet_unset = False
-
-                    collision(zomb,soldier)
-
-                except:
-                    pass
 
         for zomb in Level_1:
             zomb.appear(time, dt)
@@ -630,6 +626,9 @@ while running:
 
         if ev.type == pygame.KEYDOWN:
             if ev.key == pygame.K_SPACE:
+                zombie_times = [random.uniform(20, 25)]
+                zombie_interval = (20, 25)
+                index = 0
                 Level_1 = []
                 Soldiers = []
                 Miners = []
