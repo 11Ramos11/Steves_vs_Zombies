@@ -254,10 +254,15 @@ shieldcard_x = 65
 shieldcard_y = 35
 shield_selected = False
 
+myFontPrice = pygame.font.Font("myfont.otf", 18)
+miner_price = myFontPrice.render("50", 1, pygame.Color("Black"))
+soldier_price = myFontPrice.render("100", 1, pygame.Color("Black"))
+shield_price = myFontPrice.render("75", 1, pygame.Color("Black"))
+
 occupied_squares = []
 
 gold_bar = pygame.image.load("gold.png")
-gold_bars = 2000
+gold_bars = 0
 gold_cooldown = 5
 gold_elapsed = 0
 gold_bar_spawned = pygame.image.load("gold_spawned.png")
@@ -335,18 +340,40 @@ while running:
         pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x, 0, sqr_size_x, sqr_size_y),3)
         pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y),3, 10, 0, 0, 0)
         pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y),3, 0, 0, 0, 10)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x - 28, sqr_size_y - 19, 28, 19), 0, 0, 10, 0,0)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x * 2 - 28, sqr_size_y - 19, 28, 19), 0, 0, 10, 0,0)
+        pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect(sqr_size_x * 3 - 28, sqr_size_y - 19, 28, 19), 0, 10, 10, 0, 0)
 
         if bucket_selected:
             pygame.draw.rect(screen, pygame.Color("red"), pygame.Rect(screen_x - sqr_size_x, 0, sqr_size_x, sqr_size_y),3, 0, 0, 0, 10)
 
         if miner_selected:
             pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(0, 0, sqr_size_x, sqr_size_y), 3)
+            pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(sqr_size_x - 28, sqr_size_y - 19, 28, 19),
+                             0, 0, 10, 0, 0)
+            miner_price = myFontPrice.render("50", 1, pygame.Color("White"))
+        else:
+            miner_price = myFontPrice.render("50", 1, pygame.Color("black"))
 
         if sol_selected:
             pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(sqr_size_x, 0, sqr_size_x, sqr_size_y), 3)
+            pygame.draw.rect(screen, pygame.Color("blue"),
+                             pygame.Rect(sqr_size_x * 2 - 28, sqr_size_y - 19, 28, 19), 0, 0, 10, 0, 0)
+            soldier_price = myFontPrice.render("100", 1, pygame.Color("White"))
+        else:
+            soldier_price = myFontPrice.render("100", 1, pygame.Color("black"))
 
         if shield_selected:
             pygame.draw.rect(screen, pygame.Color("blue"), pygame.Rect(sqr_size_x * 2, 0, sqr_size_x, sqr_size_y),3, 10, 0, 0, 0)
+            pygame.draw.rect(screen, pygame.Color("blue"),
+                             pygame.Rect(sqr_size_x * 3 - 28, sqr_size_y - 19, 28, 19), 0, 10, 10, 0, 0)
+            shield_price = myFontPrice.render("75", 1, pygame.Color("White"))
+        else:
+            shield_price = myFontPrice.render("75", 1, pygame.Color("black"))
+
+        screen.blit(miner_price, (sqr_size_x - 22, sqr_size_y - 17))
+        screen.blit(soldier_price, (sqr_size_x * 2 - 25, sqr_size_y - 17))
+        screen.blit(shield_price, (sqr_size_x * 3 - 22, sqr_size_y - 17))
 
         if click:
             mouse_x, mouse_y = pygame.mouse.get_pos()
