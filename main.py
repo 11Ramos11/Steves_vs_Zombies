@@ -13,6 +13,9 @@ row_n = int(screen_y / sqr_size_y)
 
 screen = pygame.display.set_mode((screen_x, screen_y))
 
+score = []
+score_unset = True
+
 gameoverscreen = pygame.image.load("gameover.jpg")
 gameover = False
 clock = pygame.time.Clock()
@@ -253,11 +256,7 @@ shield_selected = False
 
 occupied_squares = []
 
-shooting_timer = 0
-eating_timer = 0
-
 gold_bar = pygame.image.load("gold.png")
-start_gold_timer = 0
 gold_bars = 0
 gold_cooldown = 5
 gold_elapsed = 0
@@ -311,7 +310,7 @@ while running:
                     pygame.draw.rect(screen, sqr2_color, pygame.Rect(col * sqr_size_x, row * sqr_size_y, sqr_size_x, sqr_size_y))
 
         timer = pygame.time.get_ticks()
-        time = pygame.time.get_ticks() / 1000 - new_time
+        time = (pygame.time.get_ticks() - new_time) / 1000
         dt = clock.tick()
 
         if zombie_times[index] < time:
@@ -392,6 +391,7 @@ while running:
             bucketcard_requirements = screen_x - sqr_size_x < mouse_x < screen_x and 0 < mouse_y < sqr_size_y
 
             if bucketcard_requirements:
+
                 select = mixer.Sound("select.wav")
                 select.play()
                 if bucket_selected:
@@ -420,6 +420,7 @@ while running:
             shieldcard_requirements = sqr_size_x*2 < mouse_x < sqr_size_x*3 and 0 < mouse_y < sqr_size_y
 
             if shieldcard_requirements:
+
                 select = mixer.Sound("select.wav")
                 select.play()
                 if shield_selected:
@@ -591,7 +592,6 @@ while running:
                 gameover = True
 
         if time - gold_elapsed >= gold_spawn_cooldown and not gold_spawned:
-            gold_elapsed = time
             gold_pos = (random.randint(0, screen_x-gold_spawn_sizex), random.randint(sqr_size_y, screen_y - sqr_size_y * 2))
             gold_spawned = True
 
@@ -616,8 +616,11 @@ while running:
         pygame.display.flip()
 
     if running:
+        if score_unset:
+            score += [time]
+            score_unset = False
         myFontScore = pygame.font.Font("myfont.otf", 30)
-        score_label = myFontScore.render("Your Score: " + str(int(time)), 1, pygame.Color("Red"))
+        score_label = myFontScore.render("Your Score: "+ str(int(time))+ "\n\nHighScore: " + str(int(max(score))), 1, pygame.Color("Red"))
         score_x, score_y = (score_label.get_size())
         screen.blit(gameoverscreen, (0, 0))
         screen.blit(score_label, ((screen_x/2 - (score_x/2)), screen_y - score_y - 5))
@@ -631,6 +634,7 @@ while running:
                 Soldiers = []
                 Miners = []
                 Shields = []
+                occupied_squares = []
 
                 shield_selected = False
                 miner_selected = False
@@ -639,10 +643,9 @@ while running:
                 new_time = timer
                 gold_bars = 0
                 gold_spawned = False
-                gold_elapsed = timer
-                start_gold_timer = timer
-                shooting_timer = timer
+                gold_elapsed = 0
                 mixer.music.play(-1)
+                score_unset = True
                 gameover = False
 
         if ev.type == pygame.QUIT:
