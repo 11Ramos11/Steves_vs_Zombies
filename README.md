@@ -7,15 +7,6 @@
 
 1. Criar um clone do Plants vs Zombies em Pygame
 
-
-### Repositório de código
-
-1) Link para o repositório do GitHub: https://github.com/11Ramos11/Steves_vs_Zombies
-
-2) Adicionar, como colaborador com permissão de leitura (*role read*):
-
-- https://github.com/rpmcruz
-
 ### Descrição
 
 *É um jogo de tower-defense em que o objetivo do jogo é impedir que os zombies atravessem o terreno. 
