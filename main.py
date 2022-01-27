@@ -279,6 +279,7 @@ running = True
 grid = [[0]]
 
 click = False
+mouse_menu = False
 
 clock = pygame.time.Clock()
 
@@ -300,10 +301,13 @@ for i in range(1, col_n):
             column.append(1)
     grid.append(column)
 
+
+started = False
 while running:
 
     timer = pygame.time.get_ticks()
-    while not gameover:
+
+    while not gameover and started:
         screen.fill(pygame.Color((225, 198, 153, 255)))
         for col in range(col_n):
             for row in range(1,row_n - 1):
@@ -526,21 +530,32 @@ while running:
             soldier.health_bar()
 
 
-        def collision(eater, eaten):
-            if eater.y // sqr_size_y == eaten.y // sqr_size_y and (eaten.x + eaten.size_x / 2) <= eater.x + 25 <= (eaten.x + eaten.size_x):
-                eater.speed = -0.03 * eaten.dead
+
+        def collision(eater, eaten, lista):
+            collision_cond = eater.y // sqr_size_y == eaten.y // sqr_size_y and (eaten.x + eaten.size_x / 2) <= eater.x + 25 <= (eaten.x + eaten.size_x)
+
+            def speed(zombie):
+                if collision_cond:
+                    zombie.speed = -0.03
+                return zombie
+
+            if collision_cond:
+
+                eater.speed = 0
 
                 if eater.ate(time):
                     eaten.hp -= 4
 
                 if eaten.hp <= 0:
                     eaten.dead = True
-                    eater.speed = -0.03
+                    lista = list(map(speed, lista))
+
+            return lista
 
 
         for shield in Shields:
             for zomb in Level_1:
-                collision(zomb, shield)
+                Level_1 = collision(zomb, shield, Level_1)
 
             if shield.dead:
                 occupied_squares.remove(shield.temp_square)
@@ -554,12 +569,10 @@ while running:
                 shield.x, shield.y = shield.pos
             shield.appear()
 
-
-
         for miner in Miners:
 
             for zomb in Level_1:
-                collision(zomb, miner)
+                Level_1 = collision(zomb, shield, Level_1)
 
             if miner.dead:
                 occupied_squares.remove(miner.temp_square)
@@ -579,7 +592,7 @@ while running:
         for soldier in Soldiers:
 
             for zomb in Level_1:
-                collision(zomb, soldier)
+                Level_1 = collision(zomb, shield, Level_1)
 
                 temp_zombs = [zomba.x for zomba in Level_1 if
                               zomba.placed and zomba.y // sqr_size_y == zomb.y // sqr_size_y and zomba.x > soldier.x]
@@ -639,20 +652,66 @@ while running:
         pygame.display.flip()
 
     if running:
-        if score_unset:
-            score += [time]
-            score_unset = False
-        myFontScore = pygame.font.Font("myfont.otf", 30)
-        score_label = myFontScore.render("Your Score: "+ str(int(time))+ "\n\nHighScore: " + str(int(max(score))), 1, pygame.Color("Red"))
-        score_x, score_y = (score_label.get_size())
-        screen.blit(gameoverscreen, (0, 0))
-        screen.blit(score_label, ((screen_x/2 - (score_x/2)), screen_y - score_y - 5))
-        pygame.display.flip()
+
+        if not gameover:
+
+
+
+            screen.fill(pygame.Color((50, 100, 50, 255)))
+            myFontTitle = pygame.font.Font("myfont.otf", 80)
+            title = myFontTitle.render("Steves Vs. Zombies", 1, pygame.Color("White"))
+            title_x, title_y = title.get_size()
+            screen.blit(title,((screen_x - title_x)/2, 75))
+
+            myFontButton = pygame.font.Font("myfont.otf", 45)
+            play_button = myFontButton.render("Play", 1, pygame.Color("black"))
+            play_x, play_y = play_button.get_size()
+            pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect((screen_x - play_x) / 2 - 45, (screen_y - play_y)/2 - 5, play_x + 90, play_y + 10), 0 , 7)
+            pygame.draw.rect(screen, pygame.Color("dark gray"), pygame.Rect((screen_x - play_x) / 2 - 45, (screen_y - play_y)/2 - 5, play_x + 90, play_y + 10), 3, 7)
+            screen.blit(play_button, ((screen_x - play_x) / 2, (screen_y - play_y) / 2))
+
+            quit_button = myFontButton.render("Quit", 1, pygame.Color("black"))
+            quit_x, quit_y = quit_button.get_size()
+            pygame.draw.rect(screen, pygame.Color("light gray"), pygame.Rect((screen_x - play_x) / 2 - 45, (screen_y - quit_y)/2 + 65, play_x + 90, play_y + 10), 0 , 7)
+            pygame.draw.rect(screen, pygame.Color("dark gray"),
+                             pygame.Rect((screen_x - play_x) / 2 - 45, (screen_y - quit_y) / 2 + 65, play_x + 90,
+                                         play_y + 10), 3, 7)
+            screen.blit(quit_button, ((screen_x - quit_x) / 2, screen_y / 2 + 50))
+
+            mixer.music.play(-1)
+            new_time = timer
+
+            if mouse_menu:
+                mouse_menu_x, mouse_menu_y = pygame.mouse.get_pos()
+                if play_x + 90 + ((screen_x - play_x) / 2 - 45) >= mouse_menu_x >= ((screen_x - play_x) / 2 - 45):
+                    if play_y + 10 + (screen_y - play_y)/2 - 5 >= mouse_menu_y >= (screen_y - play_y)/2 - 5:
+                        started = True
+                        select = mixer.Sound("select.wav")
+                        select.play()
+                if (screen_x - play_x) / 2 - 45 + play_x + 90 >= mouse_menu_x >= (screen_x - play_x) / 2 - 45:
+                    if play_y + 10 + (screen_y - quit_y) / 2 + 65 >= mouse_menu_y >= (screen_y - quit_y) / 2 + 65:
+                        running = False
+                        select = mixer.Sound("select.wav")
+                        select.play()
+                mouse_menu = False
+
+        if gameover:
+
+            if score_unset:
+                score += [time]
+                score_unset = False
+            myFontScore = pygame.font.Font("myfont.otf", 30)
+            score_label = myFontScore.render("Your Score: "+ str(int(time))+ "\n\nHighScore: " + str(int(max(score))), 1, pygame.Color("Red"))
+            score_x, score_y = (score_label.get_size())
+            screen.blit(gameoverscreen, (0, 0))
+            screen.blit(score_label, ((screen_x/2 - (score_x/2)), screen_y - score_y - 5))
+
+    pygame.display.flip()
 
     for ev in pygame.event.get():
 
         if ev.type == pygame.KEYDOWN:
-            if ev.key == pygame.K_SPACE:
+            if ev.key == pygame.K_SPACE and gameover:
                 zombie_times = [random.uniform(20, 25)]
                 zombie_interval = (20, 25)
                 index = 0
@@ -674,7 +733,11 @@ while running:
                 score_unset = True
                 gameover = False
 
+
         if ev.type == pygame.QUIT:
             running = False
+
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+            mouse_menu = True
 
 pygame.quit()
