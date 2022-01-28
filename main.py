@@ -572,7 +572,7 @@ while running:
         for miner in Miners:
 
             for zomb in Level_1:
-                Level_1 = collision(zomb, shield, Level_1)
+                Level_1 = collision(zomb, miner, Level_1)
 
             if miner.dead:
                 occupied_squares.remove(miner.temp_square)
@@ -592,7 +592,7 @@ while running:
         for soldier in Soldiers:
 
             for zomb in Level_1:
-                Level_1 = collision(zomb, shield, Level_1)
+                Level_1 = collision(zomb, soldier, Level_1)
 
                 temp_zombs = [zomba.x for zomba in Level_1 if
                               zomba.placed and zomba.y // sqr_size_y == zomb.y // sqr_size_y and zomba.x > soldier.x]
